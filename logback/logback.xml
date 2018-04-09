@@ -1,0 +1,99 @@
+<!-- Reference:
+ https://stackify.com/logging-logback/
+ https://logback.qos.ch/manual/configuration.html
+ -->
+<configuration>
+
+<property name="DEV_HOME" value="/tmp/hermes" />
+
+<appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+        <pattern>%d{HH:mm:ss.SSS} %green([%thread]) %highlight(%-5level) %logger{36} - %msg%n</pattern>
+    </encoder>
+</appender>
+
+<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${DEV_HOME}/logs/application.log</file>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+        <level>INFO</level>
+    </filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <!-- daily rollover. Make sure the path matches the one in the file element or else
+         the rollover logs are placed in the working directory. -->
+        <fileNamePattern>${DEV_HOME}/logs/archived/application_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        <!-- each file should be at most 10MB, keep 30 days worth of history, but at most 3GB -->
+        <maxFileSize>10MB</maxFileSize>
+        <maxHistory>30</maxHistory>
+        <totalSizeCap>3GB</totalSizeCap>
+    </rollingPolicy>
+    <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <encoder>
+        <charset>UTF-8</charset>
+        <pattern>%d %-4relative %green([%thread]) %highlight(%-5level) %logger{35} - %msg%n</pattern>
+    </encoder>
+</appender>
+
+<appender name="FILE-AUDIT"
+          class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${DEV_HOME}/debug.log</file>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+        <level>DEBUG</level>
+    </filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <!-- rollover daily -->
+        <fileNamePattern>${DEV_HOME}/archived/debug.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        <!-- each file should be at most 100MB, keep 7 days worth of history, but at most 3GB -->
+        <maxFileSize>100MB</maxFileSize>
+        <maxHistory>7</maxHistory>
+        <totalSizeCap>3GB</totalSizeCap>
+    </rollingPolicy>
+    <encoder>
+        <charset>UTF-8</charset>
+        <pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+
+</appender>
+
+<appender name="FILE-ERROR"
+          class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${DEV_HOME}/logs/error.log</file>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+        <level>ERROR</level>
+    </filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <!-- rollover daily -->
+        <fileNamePattern>${DEV_HOME}/logs/archived/error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        <!-- each file should be at most 10MB, keep 30 days worth of history, but at most 3GB -->
+        <maxFileSize>10MB</maxFileSize>
+        <maxHistory>30</maxHistory>
+        <totalSizeCap>3GB</totalSizeCap>
+    </rollingPolicy>
+    <encoder>
+        <charset>UTF-8</charset>
+        <pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+</appender>
+
+<appender name="htmlAppender" class="ch.qos.logback.core.FileAppender">
+    <file>${DEV_HOME}/logs/html_log.html</file>
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+        <layout class="ch.qos.logback.classic.html.HTMLLayout">
+            <pattern>%thread%level%logger%msg</pattern>
+        </layout>
+    </encoder>
+</appender>
+
+<!-- Loggers -->
+<logger name="org.apache.spark" level="INFO"/>
+<logger name="akka" level="INFO"/>
+<logger name="com.apple" level="INFO" additivity="false"/>
+
+
+<root level="INFO">
+    <appender-ref ref="FILE" />
+    <appender-ref ref="FILE-ERROR" />
+    <appender-ref ref="consoleAppender" />
+    <appender-ref ref="htmlAppender" />
+</root>
+</configuration>
